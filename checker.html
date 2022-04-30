@@ -5,12 +5,29 @@
     	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     	<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Visualizzatore</title>
-
+		
 
 		<style type="text/css">
 			label{
 				font-weight: bold;
 				color: darkblue;
+			}
+			li,h3{
+				margin-left:15px;
+			}
+			span{
+				font-weight: bold;
+				color:red;
+				user-select: text; /* Chrome and Opera */
+				-webkit-user-select: text; /* Safari */
+				-moz-user-select: text; /* Firefox */
+				-ms-user-select: text; /* Internet Explorer/Edge */
+			}
+			.disable-select{
+				user-select: none; /* Chrome and Opera */
+				-webkit-user-select: none; /* Safari */
+				-moz-user-select: none; /* Firefox */
+				-ms-user-select: none; /* Internet Explorer/Edge */
 			}
 		</style>
 		<script type="text/javascript">
@@ -19,72 +36,72 @@
 				var data,endpoint,idOrdine;
 				var file=document.getElementById("fileXML").files[0];
 				document.getElementById("divTripletta").style.display='none';
+				
 				if(file!=null){
 					var text = "";
-					var reader = new FileReader();
-					var onload = function(event) {
-						text = reader.result;
-						//alert(text);
-						var parser=new DOMParser();
-						var xmlDoc=parser.parseFromString(text,"text/xml");
-
-						//controllo struttura file
-						try{
-							idOrdine=xmlDoc.getElementsByTagName("cbc:ID")[0].childNodes[0].nodeValue;
-							data=xmlDoc.getElementsByTagName("cbc:IssueDate")[0].childNodes[0].nodeValue;
-							endpoint=xmlDoc.getElementsByTagName("cbc:EndpointID")[0].childNodes[0].nodeValue;
-
-							document.getElementById("testoTripletta").innerHTML=endpoint+":"+idOrdine+":"+data;
-							document.getElementById("divTripletta").style.display='block';
-							/*
-							var messaggio="IMPOSSIBILE CALCOLARE LA TRIPLETTA!!\n";
-							if(idOrdine==null){
-								var messaggio="Manca l'identificativo del documento (tag XML cbc:ID)";
-								if(data==null){
-									messaggio=messaggio+"\nManca la data d'emissione dell'ordine (tag XML cbc:IssueDate)";
+					var splitNomeFile=file.name.split(".");
+					if((splitNomeFile[1]!="xml")||(splitNomeFile.length>2)){
+						alert("Il file selezionato non ha estensione XML");
+					}
+					else{
+						var reader = new FileReader();
+						var onload = function(event) {
+							text = reader.result;
+							//alert(text);
+							var parser=new DOMParser();
+							var xmlDoc=parser.parseFromString(text,"text/xml");
+							
+							//controllo struttura file
+							try{
+								idOrdine=xmlDoc.getElementsByTagName("cbc:ID")[0].childNodes[0].nodeValue;
+								data=xmlDoc.getElementsByTagName("cbc:IssueDate")[0].childNodes[0].nodeValue;
+								endpoint=xmlDoc.getElementsByTagName("cbc:EndpointID")[0].childNodes[0].nodeValue;
+								//document.getElementById("tripletta").innerHTML=endpoint+":"+idOrdine+":"+data;
+								//document.getElementById("idOrdine").innerHTML=idOrdine;
+								var spans=document.getElementsByClassName("idOrdine");
+								for(var i=0;i<spans.length;i++){
+									spans[i].innerHTML=idOrdine;
 								}
-								if(endpoint==null){
-									messaggio=messaggio+"\nManca il codice identificativo del trasmittente (tag XML cbc:EndpointID)";
-								}
-								alert(messaggio);
-							}
-							else{
-								document.getElementById("testoTripletta").innerHTML=endpoint+":"+idOrdine+":"+data;
+								document.getElementById("dataOrdine").innerHTML=data;
+								document.getElementById("endpointID").innerHTML=endpoint;
 								document.getElementById("divTripletta").style.display='block';
+							
 							}
-							*/
-						}
-						catch(error){
-							alert("Il file inserito non è corretto!\nControllare i tag <cbc:id>,<cbc:IssueDate>,<cbc:EndpointID> del file XML.");
-							console.error(error);
-						}
-				
-					};
-					reader.onload = onload;
-					reader.readAsText(file);
+							catch(error){
+								alert("Il file inserito non è corretto!\nControllare i tag <cbc:ID>,<cbc:IssueDate>,<cbc:EndpointID> del file XML.");
+								console.error(error);
+							}
+						};
+						
+						reader.onload = onload;
+						reader.readAsText(file);
+					}
 					
 				}
 				else{
 					alert("Seleziona il file XML!");
 				}
-				
 			}
 		</script>
 	</head>
 	<body>
-		<h2>
-			Visualizzatore Tripletta
-		</h2>
+		<h1>
+			Visualizzatore Tripletta 
+		</h1>
 		<p>Per visualizzare la Tripletta d'Identificazione dell'Ordine d'acquisto, caricare il file utilizzando il tasto "Scegli file" nell'area sottostante e premere il tasto "Visualizza tripletta"</p>
 		<label for="fileXML"> File XML: </label> 
-		<input type="file" accept=".xml" id="fileXML" name="fileXML" style="width:60%;display:inline;border-style:groove;"> 
+		<input type="file" accept=".xml" id="fileXML" name="fileXML" style="width:60%;border-style:groove;"> 
 		</input> <br></br>
 		<button type="button" onclick="visualizzaTripletta()">Visualizza tripletta</button> <br> </br>
 		
-		<div id="divTripletta" align="center" style="display:none;">
-		   <h3>La tripletta dell'ordine è: </h3> 
-		   <p id="testoTripletta"> ENDPOINT:ID_ORDINE:DATA_EMISSIONE </p>
+		<div id="divTripletta" style="display:none;border-style:groove;">
+		   <h3 class="disable-select">La tripletta dell'ordine deve essere riportata nel seguente modo: </h3> 
+				<ul>
+					<li class="disable-select"> L'identificativo dell'ordine  <span class="idOrdine">ID_ORDINE</span> ; </li>
+					<li class="disable-select"> La data d'emissione <span id="dataOrdine">DATA_EMISSIONE</span> </li>
+					<li class="disable-select"> L'identificativo del soggetto (EndpointID)  <span id="endpointID">ENDPOINT</span> </li>
+				</ul>
+					
 		</div>
-
 	</body>
 </html>
